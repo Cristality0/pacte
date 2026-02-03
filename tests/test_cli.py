@@ -83,7 +83,9 @@ def test_paste_command_new_file_no_create_flag(
     assert result.exit_code == 3  # FileOperationError exit code
     assert not file_path.exists()
     assert "File does not exist" in result.stdout
-    assert "Use without --no-create to create it" in result.stdout
+    # Remove newlines from output for comparison (terminal wrapping can split the message)
+    normalized_output = result.stdout.replace("\n", " ")
+    assert "Use without --no-create to create it" in normalized_output
 
 
 @patch("pacte.clipboard.pyperclip.paste")

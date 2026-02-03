@@ -13,7 +13,7 @@ wheels/
 .coverage
 htmlcov/
 .coverage.*
-
+coverage.xml
 temp/
 
 # development-generated files
