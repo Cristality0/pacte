@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Coverage reports
+.coverage
+htmlcov/
+.coverage.*
+
+temp/
+
+# development-generated files
+.pytest_cache/
+.ruff_cache/

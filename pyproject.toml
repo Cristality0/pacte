@@ -3,11 +3,14 @@ name = "pacte"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-authors = [
-    { name = "Cristality_", email = "jovarasz@gmail.com" }
-]
+authors = [{ name = "Cristality_", email = "jovarasz@gmail.com" }]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "platformdirs>=4.5.1",
+    "pyperclip>=1.11.0",
+    "textual>=7.5.0",
+    "typer>=0.21.1",
+]
 
 [project.scripts]
 pacte = "pacte:main"
@@ -18,6 +21,103 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "pytest>=9.0.2",
+    "pytest-asyncio>=1.3.0",
+    "pytest-cov>=7.0.0",
+    "pytest-mock>=3.15.1",
     "ruff>=0.14.14",
     "ty>=0.0.14",
 ]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    # Core quality & errors
+    "F", # Pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+
+    # Type checking & annotations
+    "ANN", # flake8-annotations
+
+    # Code quality & best practices
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "PIE",  # flake8-pie
+    "SIM",  # flake8-simplify
+    "PERF", # Perflint
+    "FURB", # refurb
+    "RUF",  # Ruff-specific rules
+
+    # Error handling
+    "TRY", # tryceratops
+    "BLE", # flake8-blind-except
+
+    # Security
+    "S", # flake8-bandit
+
+    # Import organization
+    "I",   # isort
+    "ICN", # flake8-import-conventions
+
+    # Code style & modernization
+    "UP", # pyupgrade
+    "N",  # pep8-naming
+
+    # Testing
+    "PT", # flake8-pytest-style
+
+    # Documentation
+    "D", # pydocstyle
+
+    # Unused code
+    "ARG", # flake8-unused-arguments
+
+    # Path handling
+    "PTH", # flake8-use-pathlib
+
+    # Additional valuable rules
+    "PL",  # Pylint
+    "RET", # flake8-return
+    "C90", # mccabe
+    "T10", # flake8-debugger
+    "EM",  # flake8-errmsg
+]
+
+ignore = [
+    # Allow use of Any in type annotations (sometimes necessary)
+    "ANN401",
+    # Allow TODO/FIXME comments during development
+    "FIX002",
+    # Allow f-string and string literals in exceptions (common pattern)
+    "EM101",
+    "EM102",
+    "EM103",
+    # Allow complex exception handling patterns (TRY rules overly strict)
+    "TRY003", # Long messages in exceptions
+    "TRY300", # Else blocks after return
+    "TRY301", # Abstract raise
+    # Allow typer.Argument in defaults (required by Typer framework)
+    "B008",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # Allow assert in tests
+    "ANN",     # Don't require type annotations in tests
+    "D",       # Don't require docstrings in tests
+    "PLR2004", # Allow magic values in tests
+    "ARG",     # Allow unused arguments (fixtures)
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 12
+
+[tool.ruff.lint.isort]
+known-first-party = ["pacte"]
