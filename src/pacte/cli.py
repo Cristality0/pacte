@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -49,12 +50,14 @@ def handle_error(error: Exception, exit_code: int = 1) -> None:
 
 @app.command(name="paste")
 def paste_command(
-    file_path: Path = typer.Argument(..., help="Target file path"),
-    no_backup: bool = typer.Option(False, "--no-backup", help="Skip backup creation"),
-    force: bool = typer.Option(False, "--force", "-f", help="Overwrite without confirmation"),
-    no_create: bool = typer.Option(
-        False, "--no-create", help="Fail if file doesn't exist instead of creating it"
-    ),
+    file_path: Annotated[Path, typer.Argument(help="Target file path")],
+    no_backup: Annotated[bool, typer.Option("--no-backup", help="Skip backup creation")] = False,
+    force: Annotated[
+        bool, typer.Option("--force", "-f", help="Overwrite without confirmation")
+    ] = False,
+    no_create: Annotated[
+        bool, typer.Option("--no-create", help="Fail if file doesn't exist instead of creating it")
+    ] = False,
 ) -> None:
     """Paste clipboard content to a file.
 
@@ -128,9 +131,9 @@ def paste_command(
 
 @app.command(name="append")
 def append_command(
-    file_path: Path = typer.Argument(..., help="Target file path"),
-    no_newline: bool = typer.Option(False, "--no-newline", help="Don't add newline"),
-    no_backup: bool = typer.Option(False, "--no-backup", help="Skip backup creation"),
+    file_path: Annotated[Path, typer.Argument(help="Target file path")],
+    no_newline: Annotated[bool, typer.Option("--no-newline", help="Don't add newline")] = False,
+    no_backup: Annotated[bool, typer.Option("--no-backup", help="Skip backup creation")] = False,
 ) -> None:
     """Append clipboard content to a file.
 
@@ -184,8 +187,8 @@ def append_command(
 
 @app.command(name="copy")
 def copy_command(
-    file_path: Path = typer.Argument(..., help="Source file path"),
-    encoding: str = typer.Option("utf-8", "--encoding", help="File encoding"),
+    file_path: Annotated[Path, typer.Argument(help="Source file path")],
+    encoding: Annotated[str, typer.Option("--encoding", help="File encoding")] = "utf-8",
 ) -> None:
     """Copy file content to clipboard."""
     try:
@@ -220,8 +223,10 @@ def copy_command(
 
 @app.command(name="undo")
 def undo_command(
-    last: bool = typer.Option(False, "--last", help="Undo last operation without prompt"),
-    list_history: bool = typer.Option(False, "--list", help="List operation history"),
+    last: Annotated[
+        bool, typer.Option("--last", help="Undo last operation without prompt")
+    ] = False,
+    list_history: Annotated[bool, typer.Option("--list", help="List operation history")] = False,
 ) -> None:
     """Undo a paste or append operation.
 

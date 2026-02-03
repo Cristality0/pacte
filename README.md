@@ -4,15 +4,14 @@
 
 ## Features
 
-- ✨ **Paste clipboard to files** with automatic backups
-- ➕ **Append clipboard content** to existing files
-- 📋 **Copy file contents** to clipboard
-- ↩️ **Undo operations** with interactive TUI
-- 🎯 **Operation history** tracking (last 50 operations)
-- 🔒 **Automatic backups** before overwriting files
-- ⚙️ **Configurable** via `pyproject.toml`
-- 🚀 **Fast** and lightweight
-- 💻 **Cross-platform** (Windows, macOS, Linux)
+- **Paste clipboard to files** with automatic backups
+- **Append clipboard content** to existing files
+- **Copy file contents** to clipboard
+- **Undo operations** with interactive TUI
+- **Operation history** tracking (last 50 operations)
+- **Automatic backups** before overwriting files
+- **Configurable** via `pyproject.toml`
+- **Cross-platform** (Windows, macOS, Linux)
 
 ## Installation
 
@@ -33,12 +32,8 @@ uv run pacte --help
 Install pacte globally to use it anywhere without `uv run`:
 
 ```bash
-# From the project directory
-uv pip install -e .
-
-# Or install from wheel
 uv build
-uv pip install dist/pacte-*.whl
+uv tool install dist/pacte-*.whl
 ```
 
 After global installation, you can use `pacte` directly:
@@ -88,32 +83,8 @@ source ~/.config/fish/completions/pacte.fish
 #### PowerShell
 
 ```powershell
-# Add to your PowerShell profile
+# Add this line to your PowerShell profile (see $PROFILE) to enable completions:
 pacte --show-completion powershell | Out-String | Invoke-Expression
-
-# To make it permanent, add to your profile:
-# Find profile location: $PROFILE
-# Add this line to the profile:
-pacte --show-completion powershell | Out-String | Invoke-Expression
-```
-
-#### Installing Completions Script
-
-For a more permanent setup, add the completion generation to your shell's startup file:
-
-**Bash** (`~/.bashrc`):
-```bash
-eval "$(pacte --show-completion bash)"
-```
-
-**Zsh** (`~/.zshrc`):
-```bash
-eval "$(pacte --show-completion zsh)"
-```
-
-**Fish** (`~/.config/fish/config.fish`):
-```fish
-pacte --show-completion fish | source
 ```
 
 ## Quick Start
@@ -237,9 +208,6 @@ datetime_format = "%H:%M:%S"  # Time format in TUI
 ```bash
 # Install dependencies
 uv sync
-
-# Install dev dependencies
-uv add --dev pytest pytest-cov pytest-mock pytest-asyncio
 
 # Run tests
 uv run pytest
