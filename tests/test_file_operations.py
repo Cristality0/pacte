@@ -299,3 +299,64 @@ def test_is_binary_file_custom_sample_size(tmp_path: Path) -> None:
 
     # Use a very small sample size
     assert is_binary_file(file_path, sample_size=5) is False
+
+
+def test_create_backup_write_error(tmp_path: Path) -> None:
+    """Test create_backup handles write errors properly."""
+    file_path = tmp_path / "test.txt"
+    file_path.write_text("content", encoding="utf-8")
+
+    # Create a situation where backup write fails
+    with (
+        patch.object(Path, "write_bytes", side_effect=OSError("Write failed")),
+        pytest.raises(FileOperationError, match="Failed to create backup"),
+    ):
+        create_backup(file_path)
+
+
+def test_append_to_file_generic_error(tmp_path: Path) -> None:
+    """Test append_to_file handles generic errors."""
+    file_path = tmp_path / "test.txt"
+
+    # Mock the open method to raise a generic error
+    with (
+        patch("pathlib.Path.open", side_effect=RuntimeError("Unexpected error")),
+        pytest.raises(FileOperationError, match="Failed to append to file"),
+    ):
+        append_to_file(file_path, "content")
+
+
+def test_read_from_file_generic_error(tmp_path: Path) -> None:
+    """Test read_from_file handles generic errors beyond UnicodeDecodeError."""
+    file_path = tmp_path / "test.txt"
+    file_path.write_text("content", encoding="utf-8")
+
+    # Mock read_text to raise a generic error
+    with (
+        patch.object(Path, "read_text", side_effect=RuntimeError("Unexpected error")),
+        pytest.raises(FileOperationError, match="Failed to read file"),
+    ):
+        read_from_file(file_path)
+
+
+def test_is_binary_file_permission_error(tmp_path: Path) -> None:
+    """Test is_binary_file re-raises OSError like PermissionError."""
+    file_path = tmp_path / "test.txt"
+    file_path.write_text("content", encoding="utf-8")
+
+    # Mock open to raise PermissionError (which is an OSError)
+    with (
+        patch.object(Path, "open", side_effect=PermissionError("Permission denied")),
+        pytest.raises(PermissionError),
+    ):
+        is_binary_file(file_path)
+
+
+def test_is_binary_file_nonexistent_file() -> None:
+    """Test is_binary_file handles non-existent files."""
+    file_path = Path("/nonexistent/file.txt")
+
+    # Non-existent files should return False
+    result = is_binary_file(file_path)
+
+    assert result is False

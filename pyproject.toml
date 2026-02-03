@@ -88,8 +88,6 @@ select = [
 ]
 
 ignore = [
-    # Allow use of Any in type annotations (sometimes necessary)
-    "ANN401",
     # Allow TODO/FIXME comments during development
     "FIX002",
     # Allow f-string and string literals in exceptions (common pattern)
@@ -102,6 +100,7 @@ ignore = [
     "TRY301", # Abstract raise
     # Allow typer.Argument in defaults (required by Typer framework)
     "B008",
+    "PLC0415", # should be at the    top-level of a file
 ]
 
 [tool.ruff.lint.per-file-ignores]

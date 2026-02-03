@@ -2,7 +2,7 @@
 
 import sys
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, cast
 
 import typer
 from rich.console import Console
@@ -257,9 +257,15 @@ def undo_command(
                 operations, datetime_format=config.datetime_format
             )
 
-        if not selected_operation:
+        if selected_operation is None:
             console.print("[yellow]Operation cancelled[/yellow]")
             sys.exit(5)
+
+        # Type narrowing: at this point selected_operation is guaranteed to be not None
+        # Use cast to help the type checker understand this
+        from .models import Operation
+
+        selected_operation = cast(Operation, selected_operation)
 
         # Perform undo
         target_path = Path(selected_operation.target_path)

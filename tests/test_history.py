@@ -324,3 +324,114 @@ def test_operations_sorted_newest_first(clean_history: HistoryManager, tmp_path:
     assert "Content 2" in operations[0].content_preview
     assert "Content 1" in operations[1].content_preview
     assert "Content 0" in operations[2].content_preview
+
+
+def test_add_operation_save_error(clean_history: HistoryManager, tmp_path: Path) -> None:
+    """Test add_operation handles save errors."""
+    # Mock _save_history to raise an error
+    with (
+        patch.object(clean_history, "_save_history", side_effect=OSError("Disk full")),
+        pytest.raises(HistoryError, match="Failed to add operation to history"),
+    ):
+        clean_history.add_operation(
+            operation_type="paste",
+            target_path=tmp_path / "test.txt",
+            backup_path=None,
+            content_preview="Content",
+        )
+
+
+def test_remove_operation_generic_error(clean_history: HistoryManager, tmp_path: Path) -> None:
+    """Test remove_operation handles generic errors."""
+    operation = clean_history.add_operation(
+        operation_type="paste",
+        target_path=tmp_path / "test.txt",
+        backup_path=None,
+        content_preview="Content",
+    )
+
+    # Mock _save_history to raise an error
+    with (
+        patch.object(clean_history, "_save_history", side_effect=RuntimeError("Unexpected error")),
+        pytest.raises(HistoryError, match="Failed to remove operation from history"),
+    ):
+        clean_history.remove_operation(operation.id)
+
+
+def test_load_history_generic_error(tmp_path: Path) -> None:
+    """Test _load_history handles generic file reading errors."""
+    manager = HistoryManager(history_dir=tmp_path, max_history=50)
+
+    # Create a valid JSON file
+    manager.history_file.write_text('{"operations": []}', encoding="utf-8")
+
+    # Mock open to raise an error
+    with (
+        patch.object(Path, "open", side_effect=OSError("Permission denied")),
+        pytest.raises(HistoryError, match="Failed to load history"),
+    ):
+        manager.get_operations()
+
+
+def test_save_history_write_error(clean_history: HistoryManager, tmp_path: Path) -> None:
+    """Test _save_history handles write errors."""
+    # Make the history directory read-only by mocking file write
+    with (
+        patch("pathlib.Path.open", side_effect=OSError("Permission denied")),
+        pytest.raises(HistoryError, match="Failed to save history"),
+    ):
+        clean_history.add_operation(
+            operation_type="paste",
+            target_path=tmp_path / "test.txt",
+            backup_path=None,
+            content_preview="Content",
+        )
+
+
+def test_cleanup_silently_handles_backup_deletion_errors(tmp_path: Path) -> None:
+    """Test that cleanup silently handles errors when deleting backup files."""
+    manager = HistoryManager(history_dir=tmp_path, max_history=2)
+
+    # Create backup files
+    backup1 = tmp_path / "backup1.bak"
+    backup2 = tmp_path / "backup2.bak"
+    backup3 = tmp_path / "backup3.bak"
+
+    for backup in [backup1, backup2, backup3]:
+        backup.write_text("backup content", encoding="utf-8")
+
+    # Add operations
+    manager.add_operation(
+        operation_type="paste",
+        target_path=tmp_path / "test1.txt",
+        backup_path=backup1,
+        content_preview="Content 1",
+    )
+
+    manager.add_operation(
+        operation_type="paste",
+        target_path=tmp_path / "test2.txt",
+        backup_path=backup2,
+        content_preview="Content 2",
+    )
+
+    # Mock unlink to raise OSError for backup1
+    original_unlink = Path.unlink
+
+    def mock_unlink(self: Path, *args, **kwargs):
+        if self == backup1:
+            raise OSError("Permission denied")
+        return original_unlink(self, *args, **kwargs)
+
+    with patch.object(Path, "unlink", mock_unlink):
+        # This should trigger cleanup but not raise an error
+        manager.add_operation(
+            operation_type="paste",
+            target_path=tmp_path / "test3.txt",
+            backup_path=backup3,
+            content_preview="Content 3",
+        )
+
+    # Should still have 2 operations
+    operations = manager.get_operations()
+    assert len(operations) == 2
